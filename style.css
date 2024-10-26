@@ -1,0 +1,179 @@
+:root{
+    --primary-color:  #4B4E53 ; /* Graphite Gray Onyx #353839 Outer Space #414A4C  Marengo #4C5866 Pewter #899499 Jet gray #343434;*/
+    --secondary-color: white;
+    --tertiary-color:  #FF8C00; /*Dark Orange */
+}
+
+
+
+/* Menu Part */
+
+*{
+    font-family: 'Orbitron', sans-serif;
+}
+
+html, body{
+    background-color: var(--secondary-color);
+}
+
+
+
+.thick-bar {
+    border: none;
+    height: 5px; 
+    background-color: var(--primary-color);
+    margin-bottom: 1%;
+}
+ 
+
+li{
+    list-style: none;
+    text-decoration: none;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    padding: 1rem 0;
+    cursor: pointer;
+}
+
+li:hover{
+    color: var(--tertiary-color);
+}
+
+.hover__div{
+    position: absolute;
+    transition: .5s;
+    pointer-events: none;
+    will-change: transform;
+    opacity: 0; 
+}
+.hover__div.active{
+    opacity: 1;
+}
+
+.menustrip div a {
+    /* Add your custom styles here */
+    color: inherit;
+    text-decoration: none;
+    font-weight: normal;
+           
+}
+
+.corner {
+    position: absolute;
+    width: 10%;
+    height: 10%;
+    border: 1px solid var(--primary-color);
+}
+
+.top__left { top: 0; left: 0; border-right: none; border-bottom: none; }
+.top__right { top: 0; right: 0; border-left: none; border-bottom: none; }
+.bottom__right { bottom: 0; right: 0; border-left: none; border-top: none; }
+.bottom__left { bottom: 0; left: 0; border-right: none; border-top: none; }
+
+
+
+/* Console Part */
+
+#terminal-window {
+display: none;
+position:fixed;
+bottom:0px;
+right:100px;
+opacity:1;
+z-index:99;
+color:var(--primary-color);
+width:70%;
+min-height:500px;
+max-width:800px;
+overflow-wrap: break-word;
+word-wrap: break-word;
+font-size:12pt;
+background-color:var(--secondary-color);
+padding:10px;
+text-align:left;
+font-family:Georgia, 'Times New Roman', Times, serif;
+}
+
+#terminal-input {
+    overflow-y: hidden; 
+    border: 5px solid var(--primary-color); 
+    /* height: 50px; */
+}
+
+.terminal {
+    --color: var(--primary-color);
+    --background: var(--secondary-color);
+    --link-color: var(--tertiary-color);
+    --line-thickness: 1;
+    --rows: 25;
+    resize: both;
+    overflow: hidden;
+}
+
+.cmd-cursor {
+    --original-color: var(--tertiary-color);
+}
+
+:root {
+    --size: 1;
+    --font: 'Orbitron';
+}
+
+/* @font-face {
+    font-family: msdos;
+    src: url("https://cdn.jsdelivr.net/gh/jcubic/static/assets/dos-vga.ttf");
+} */
+
+.console-container{
+cursor: pointer;
+position:fixed;
+bottom:10px;
+right:10px;
+opacity:1;
+z-index:99;
+color:var(--secondary-color);
+border: 3px solid var(--primary-color);
+padding:4px;
+width:70px;
+height:70px;
+background-color:var(--secondary-color);
+}
+
+.console-bar {
+background-color: var(--tertiary-color); /* For browsers that do not support gradients */
+background-image: linear-gradient(to bottom right, var(--tertiary-color) 0%, var(--tertiary-color) 40%, #9d4c27 50%, var(--primary-color) 60%, var(--primary-color) 100%);
+border-top-left-radius: 20px; /* Adjust the value to change the roundness */
+border-top-right-radius: 20px; /* Adjust the value to change the roundness */
+padding: 5px;
+}
+
+.console-bottom {
+    height: 20px;
+    background-color: var(--tertiary-color); /* For browsers that do not support gradients */
+    background-image: linear-gradient(to bottom right, var(--primary-color) 0%, var(--primary-color) 40%, #9d4c27 50%, var(--tertiary-color) 60%, var(--tertiary-color) 100%);
+    border-bottom-left-radius: 20px; /* Adjust the value to change the roundness */
+    border-bottom-right-radius: 20px; /* Adjust the value to change the roundness */   
+}
+
+.close {
+    color: var(--secondary-color);
+    cursor: pointer;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    z-index: 1000;
+    display: none; /* Initially hidden */
+}
+
+
+/* canvas {
+    width: 100%;
+    height: 100%;
+} */
