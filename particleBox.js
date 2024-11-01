@@ -7,7 +7,9 @@ const config = {
     // imageUrl: 'http://127.0.0.1:5500/schwarzbild.jpg',
     poolingSize: 4,
     poolingMethod: 'maximum',
-    factor: 6 // 
+    factor: 20, // 
+    keepPixelRatio: true,
+    keepPixelPopulation: true
 }
 
 let target = document.getElementById('pCanvas').parentElement;
@@ -95,6 +97,9 @@ class Particle{
         // this.size = Math.max(3, Math.floor(Math.random() * 7))
         this.size = Math.max(Math.floor(Math.random() * 7)) //7 is matrix.length / 75
        
+        if (config.keepPixelRatio) {
+            this.size = Math.floor(this.size / window.devicePixelRatio)
+        }
        
         this.draw();
     }   
@@ -166,8 +171,7 @@ class Effect {
         this.height = height;
         this.ctx = context;
         this.particlesArray = [];
-        this.gap = Math.floor(matrix.length / 75);
-        this.matrix = reduceMatrixByAvg(matrix, this.gap)
+        this.matrix = reduceMatrix(matrix) 
         this.mouse = {
             radius: 3000,
             x: 0,
@@ -178,23 +182,37 @@ class Effect {
         const parentCanvas = canvas.parentElement;
         
         parentCanvas.addEventListener('mousemove', (e) => {
-            this.mouse.x = (e.clientX - parentCanvas.getBoundingClientRect().left) * window.devicePixelRatio;
-            this.mouse.y = (e.pageY - parentCanvas.getBoundingClientRect().top) * window.devicePixelRatio;
+            this.mouse.x = (e.clientX - parentCanvas.getBoundingClientRect().left) 
+            this.mouse.y = (e.pageY - parentCanvas.getBoundingClientRect().top) 
         });
 
 
        window.addEventListener('resize', () => {
-            // const $target = $('#pCanvas').parent();
-            // targetWidth = $target.innerWidth(), targetHeight = $target.innerHeight();
+            console.log("device", window.devicePixelRatio)
             let target = document.getElementById('pCanvas').parentElement;
             targetWidth = target.clientWidth;
             targetHeight = target.clientHeight;
+
         
             const canvasTarget = document.querySelector('#pCanvas');
-            canvasTarget.width = targetWidth    
-            canvasTarget.height = targetHeight
-            // this.matrix = getGrayscaleMatrix(canvasTarget) 
-            console.log('info', targetWidth, targetHeight)
+
+            // config.factor *= targetHeight / canvasTarget.height; //keep distance of original particles
+
+            this.width = canvasTarget.width = targetWidth    
+            this.height = canvasTarget.height = targetHeight
+
+                        
+            this.ctx = canvasTarget.getContext('2d');
+
+            // keep number of original particles
+            // const newMatrix = getGrayscaleMatrix(canvasTarget);
+            // this.matrix = reduceMatrix(newMatrix)
+            
+            // keep relative distance of original particles
+            const newMatrix = getGrayscaleMatrix(canvasTarget);
+            this.matrix = reduceMatrix(newMatrix)
+
+
             this.particlesArray = [];
             this.init();
         })
@@ -207,7 +225,8 @@ class Effect {
             for(let x = 0; x < this.matrix[0].length; x++){
                 let gray = this.matrix[y][x];
                 if(gray < config.threshold) {
-                    this.particlesArray.push(new Particle(x*this.gap, y*this.gap, this, gray))
+                    let gap = Math.ceil(config.factor / window.devicePixelRatio)
+                    this.particlesArray.push(new Particle(Math.floor(x*gap), Math.floor(y*gap), this, gray))
                 }
             }
         }
@@ -221,7 +240,9 @@ class Effect {
     }
 }
 
-function reduceMatrixByMax(matrix, factor) {
+function reduceMatrix(matrix) {
+    const factor = Math.ceil(config.factor / window.devicePixelRatio);
+    const byMax = config.poolingMethod;
     const numRows = matrix.length;
     const numCols = matrix[0].length;
     const reducedRows = Math.ceil(numRows / factor);
@@ -231,17 +252,26 @@ function reduceMatrixByMax(matrix, factor) {
     for (let i = 0; i < reducedRows; i++) {
         const row = [];
         for (let j = 0; j < reducedCols; j++) {
-            let maxVal = -Infinity;
+            let maxVal = -Infinity; // Max
+            let sum = 0; let count = 0; // Avg
+
             for (let x = 0; x < factor; x++) {
                 for (let y = 0; y < factor; y++) {
-                    const rowIndex = i * factor + x;
-                    const colIndex = j * factor + y;
+                    const rowIndex = Math.floor(i * factor + x);
+                    const colIndex = Math.floor(j * factor + y);
+                    
                     if (rowIndex < numRows && colIndex < numCols) {
-                        maxVal = Math.max(maxVal, matrix[rowIndex][colIndex]);
+                        maxVal = Math.max(maxVal, matrix[rowIndex][colIndex]); // Max
+                        sum += matrix[rowIndex][colIndex]; count++; // Avg
                     }
                 }
             }
-            row.push(maxVal);
+            if (byMax == 'maximum') {
+                row.push(maxVal);
+            } else {
+                row.push(sum / count);
+            }
+            
         }
         reducedMatrix.push(row);
     }
@@ -249,35 +279,35 @@ function reduceMatrixByMax(matrix, factor) {
     return reducedMatrix;
 }
 
-function reduceMatrixByAvg(matrix, factor) {
-    const numRows = matrix.length;
-    const numCols = matrix[0].length;
-    const reducedRows = Math.ceil(numRows / factor);
-    const reducedCols = Math.ceil(numCols / factor);
-    const reducedMatrix = [];
+// function reduceMatrixByAvg(matrix, factor) {
+    // const numRows = matrix.length;
+    // const numCols = matrix[0].length;
+    // const reducedRows = Math.ceil(numRows / factor);
+    // const reducedCols = Math.ceil(numCols / factor);
+    // const reducedMatrix = [];
 
-    for (let i = 0; i < reducedRows; i++) {
-        const row = [];
-        for (let j = 0; j < reducedCols; j++) {
-            let sum = 0;
-            let count = 0;
-            for (let x = 0; x < factor; x++) {
-                for (let y = 0; y < factor; y++) {
-                    const rowIndex = i * factor + x;
-                    const colIndex = j * factor + y;
-                    if (rowIndex < numRows && colIndex < numCols) {
-                        sum += matrix[rowIndex][colIndex];
-                        count++;
-                    }
-                }
-            }
-            row.push(sum / count);
-        }
-        reducedMatrix.push(row);
-    }
+    // for (let i = 0; i < reducedRows; i++) {
+    //     const row = [];
+    //     for (let j = 0; j < reducedCols; j++) {
+            // let sum = 0;
+            // let count = 0;
+            // for (let x = 0; x < factor; x++) {
+            //     for (let y = 0; y < factor; y++) {
+                    // const rowIndex = i * factor + x;
+                    // const colIndex = j * factor + y;
+                    // if (rowIndex < numRows && colIndex < numCols) {
+//                         sum += matrix[rowIndex][colIndex];
+//                         count++;
+//                     }
+//                 }
+//             }
+//             row.push(sum / count);
+//     //     }
+//     //     reducedMatrix.push(row);
+//     // }
 
-    return reducedMatrix;
-}
+//     // return reducedMatrix;
+// }
 
 function particalize(canvas) {
         const grayscaleMatrix = getGrayscaleMatrix(canvas);
