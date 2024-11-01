@@ -1,82 +1,106 @@
-const config = {
-    colors : ['#353839', '#FF8C00', '#4B4E53'],
-    geometry: 'triangle', // triangle, square
-    // pointsDown: true, // comment to toggle for triangle
-    grayMethod: 'luminosity', // lightness, average
-    threshold: 255, // 0 (black) to 255 (white)
-    // imageUrl: 'http://127.0.0.1:5500/schwarzbild.jpg',
-    poolingSize: 4,
-    poolingMethod: 'maximum',
-    factor: 20, // 
-    keepPixelRatio: true,
-    keepPixelPopulation: true
+let particleSize = {
+    random: function(baseSize, gray) {
+        return Math.max(Math.floor(Math.random() * baseSize));
+    },
+    gray: function(baseSize, gray) {
+        return Math.floor(baseSize - (gray / 255*baseSize))    
+    }
 }
 
-let target = document.getElementById('pCanvas').parentElement;
-let targetWidth = target.clientWidth;
-let targetHeight = target.clientHeight;
 
 
-function loadImageToCanvas(url, callback) {
-    const img = new Image();
-    img.crossOrigin = 'Anonymous'; // This is important for loading images from different origins
-    img.onload = () => {
-        const canvasSource = document.createElement('canvas');
-        canvasSource.setAttribute('width', targetWidth);
-        canvasSource.setAttribute('height', targetHeight);
-        const ctx = canvasSource.getContext('2d');
-        ctx.drawImage(img, 0, 0, targetWidth, targetHeight) ; 
+class MatrixHandler {
+    constructor(particleBox) {
+        this.box = particleBox
+        this.config = particleBox.config
 
-        callback(canvasSource);
-    };
-    img.src = url;
-}
-
-function getGrayscaleMatrix(canvas) {
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    const grayscaleMatrix = [];
-
-    for (let y = 0; y < canvas.height; y++) {
-        const row = [];
-        for (let x = 0; x < canvas.width; x++) {
-            const index = (y * canvas.width + x) * 4;
-        
-            const r = data[index];
-            const g = data[index + 1];
-            const b = data[index + 2];
-          
-            const gray = toGray(r,g,b, config.grayMethod);
-            row.push(gray);
+    }
+    getGrayscaleMatrix(canvas) {
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        const grayscaleMatrix = [];
+    
+        for (let y = 0; y < canvas.height; y++) {
+            const row = [];
+            for (let x = 0; x < canvas.width; x++) {
+                const index = (y * canvas.width + x) * 4;
+            
+                const r = data[index];
+                const g = data[index + 1];
+                const b = data[index + 2];
+              
+                const gray = this.toGray(r,g,b, this.config.grayMethod);
+                row.push(gray);
+            }
+            grayscaleMatrix.push(row);
         }
-        grayscaleMatrix.push(row);
+        return grayscaleMatrix;
     }
-    return grayscaleMatrix;
+    
+    toGray(r,g,b, method) {
+        let gray;
+        switch(method) {
+            case 'average':
+              gray = (r + g + b) / 3
+              break;
+            case 'lightess':
+              gray = (Math.max(r,g,b) + Math.min(r,g,b)) / 2
+              break;
+            case 'luminosity':
+            default:
+              gray = 0.299 * r + 0.587 * g + 0.114 * b
+        }
+        return Math.round(gray)
+    }
+
+    reduceMatrix(matrix) {
+        const factor = Math.ceil(this.config.factor / window.devicePixelRatio);
+        const byMax = this.config.poolingMethod;
+        const numRows = matrix.length;
+        const numCols = matrix[0].length;
+        const reducedRows = Math.ceil(numRows / factor);
+        const reducedCols = Math.ceil(numCols / factor);
+        const reducedMatrix = [];
+    
+        for (let i = 0; i < reducedRows; i++) {
+            const row = [];
+            for (let j = 0; j < reducedCols; j++) {
+                let maxVal = -Infinity; // Max
+                let sum = 0; let count = 0; // Avg
+    
+                for (let x = 0; x < factor; x++) {
+                    for (let y = 0; y < factor; y++) {
+                        const rowIndex = Math.floor(i * factor + x);
+                        const colIndex = Math.floor(j * factor + y);
+                        
+                        if (rowIndex < numRows && colIndex < numCols) {
+                            maxVal = Math.max(maxVal, matrix[rowIndex][colIndex]); // Max
+                            sum += matrix[rowIndex][colIndex]; count++; // Avg
+                        }
+                    }
+                }
+                if (byMax == 'maximum') {
+                    row.push(maxVal);
+                } else {
+                    row.push(sum / count);
+                }
+                
+            }
+            reducedMatrix.push(row);
+        }
+    
+        return reducedMatrix;
+    }
 }
 
-
-function toGray(r,g,b, method) {
-    let gray;
-    switch(method) {
-        case 'average':
-          gray = (r + g + b) / 3
-          break;
-        case 'lightess':
-          gray = (Math.max(r,g,b) + Math.min(r,g,b)) / 2
-          break;
-        case 'luminosity':
-        default:
-          gray = 0.299 * r + 0.587 * g + 0.114 * b
-    }
-    return Math.round(gray)
-}
 
 class Particle{
     constructor(x, y, effect, gray){
         this.originX = x;
         this.originY = y;
         this.effect = effect;
+        this.config = effect.config
         this.x = Math.floor(x);
         this.y = Math.floor(y);
         this.ctx = this.effect.ctx;
@@ -84,7 +108,7 @@ class Particle{
         this.vx = 0;
         this.vy = 0;
         this.ease = 0.2;
-        this.friction = 0.95;
+        this.friction = this.config.particleFriction //0.95;
         this.dx = 0;
         this.dy = 0;
         this.distance = 0;
@@ -92,25 +116,27 @@ class Particle{
         this.angle = 0;
 
         gray =  gray || 0
-        // this.size = Math.floor(7 - (gray / 255*7))       
-      
-        // this.size = Math.max(3, Math.floor(Math.random() * 7))
-        this.size = Math.max(Math.floor(Math.random() * 7)) //7 is matrix.length / 75
-       
-        if (config.keepPixelRatio) {
+     
+        if ('particleSizeFunction' in this.config) {
+            this.size = this.config.particleSizeFunction(this.config.particleSize, gray)
+        } else {
+            this.size = this.config.particleSize
+        }
+
+        if (!this.config.keepParticleSize) {
             this.size = Math.floor(this.size / window.devicePixelRatio)
         }
-       
+
         this.draw();
     }   
 
     draw(i){
-        const colors = config.colors;
+        const colors = this.config.colors;
         this.ctx.fillStyle = colors[i % colors.length];
 
         this.ctx.beginPath();
         
-        switch(config.geometry) {
+        switch(this.config.geometry) {
             case "circle":
                 this.ctx.arc(Math.floor(this.x + this.size/2), Math.floor(this.y + this.size/2), Math.floor(this.size/2), 0, 2 * Math.PI);
                 break;
@@ -129,8 +155,8 @@ class Particle{
     }
 
     drawTriangle(pointsDown) {
-        if ('pointsDown' in config) {
-            pointsDown = config.pointsDown;
+        if ('pointsDown' in this.config) {
+            pointsDown = this.config.pointsDown;
         }
 
         if (pointsDown) {
@@ -165,52 +191,50 @@ class Particle{
 }
 
 
+
+
 class Effect {
-    constructor(canvas, width, height, context, matrix){
-        this.width = width;
-        this.height = height;
-        this.ctx = context;
+    constructor(particleBox){
+        this.box = particleBox
+        this.config = this.box.config
+        this.canvas = this.box.box
+        this.width = this.canvas.width;
+        this.height = this.canvas.height;
+        this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
         this.particlesArray = [];
-        this.matrix = reduceMatrix(matrix) 
+        this.matrix = this.box.matrixHandler.reduceMatrix(this.box.matrix) 
         this.mouse = {
-            radius: 3000,
+            radius: 5000,
             x: 0,
             y: 0
         }
 
-        // const canvas = document.getElementById('pCanvas');
-        const parentCanvas = canvas.parentElement;
         
-        parentCanvas.addEventListener('mousemove', (e) => {
-            this.mouse.x = (e.clientX - parentCanvas.getBoundingClientRect().left) 
-            this.mouse.y = (e.pageY - parentCanvas.getBoundingClientRect().top) 
+        
+        this.box.parent.addEventListener('mousemove', (e) => {
+            this.mouse.x = (e.clientX - this.box.parent.getBoundingClientRect().left) 
+            this.mouse.y = (e.pageY - this.box.parent.getBoundingClientRect().top) 
         });
 
 
        window.addEventListener('resize', () => {
-            console.log("device", window.devicePixelRatio)
-            let target = document.getElementById('pCanvas').parentElement;
-            targetWidth = target.clientWidth;
-            targetHeight = target.clientHeight;
+            this.box.targetWidth = this.box.parent.clientWidth;
+            this.box.targetHeight = this.box.parent.clientHeight;
 
         
-            const canvasTarget = document.querySelector('#pCanvas');
 
-            // config.factor *= targetHeight / canvasTarget.height; //keep distance of original particles
+            if (this.config.keepParticlePopulation) {
+                this.config.factor *= this.box.targetHeight / this.canvas.height; //keep distance of original particles
+            }
 
-            this.width = canvasTarget.width = targetWidth    
-            this.height = canvasTarget.height = targetHeight
+            this.width = this.canvas.width = this.box.targetWidth    
+            this.height = this.canvas.height = this.box.targetHeight
 
                         
-            this.ctx = canvasTarget.getContext('2d');
+            this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
-            // keep number of original particles
-            // const newMatrix = getGrayscaleMatrix(canvasTarget);
-            // this.matrix = reduceMatrix(newMatrix)
-            
-            // keep relative distance of original particles
-            const newMatrix = getGrayscaleMatrix(canvasTarget);
-            this.matrix = reduceMatrix(newMatrix)
+            const newMatrix = this.box.matrixHandler.getGrayscaleMatrix(this.canvas);
+            this.matrix = this.box.matrixHandler.reduceMatrix(newMatrix)
 
 
             this.particlesArray = [];
@@ -220,12 +244,11 @@ class Effect {
     }
 
     init(){
-        console.log('length:', this.matrix.length)
         for(let y = 0; y < this.matrix.length; y++){
             for(let x = 0; x < this.matrix[0].length; x++){
                 let gray = this.matrix[y][x];
-                if(gray < config.threshold) {
-                    let gap = Math.ceil(config.factor / window.devicePixelRatio)
+                if(gray < this.config.threshold) {
+                    let gap = Math.ceil(this.config.factor / window.devicePixelRatio)
                     this.particlesArray.push(new Particle(Math.floor(x*gap), Math.floor(y*gap), this, gray))
                 }
             }
@@ -240,84 +263,55 @@ class Effect {
     }
 }
 
-function reduceMatrix(matrix) {
-    const factor = Math.ceil(config.factor / window.devicePixelRatio);
-    const byMax = config.poolingMethod;
-    const numRows = matrix.length;
-    const numCols = matrix[0].length;
-    const reducedRows = Math.ceil(numRows / factor);
-    const reducedCols = Math.ceil(numCols / factor);
-    const reducedMatrix = [];
 
-    for (let i = 0; i < reducedRows; i++) {
-        const row = [];
-        for (let j = 0; j < reducedCols; j++) {
-            let maxVal = -Infinity; // Max
-            let sum = 0; let count = 0; // Avg
 
-            for (let x = 0; x < factor; x++) {
-                for (let y = 0; y < factor; y++) {
-                    const rowIndex = Math.floor(i * factor + x);
-                    const colIndex = Math.floor(j * factor + y);
-                    
-                    if (rowIndex < numRows && colIndex < numCols) {
-                        maxVal = Math.max(maxVal, matrix[rowIndex][colIndex]); // Max
-                        sum += matrix[rowIndex][colIndex]; count++; // Avg
-                    }
-                }
-            }
-            if (byMax == 'maximum') {
-                row.push(maxVal);
-            } else {
-                row.push(sum / count);
-            }
-            
-        }
-        reducedMatrix.push(row);
+
+class ParticleBox {
+    constructor(canvasSelector, configObject){
+        this.box = document.querySelector(canvasSelector);
+        this.parent = this.box.parentElement;
+        this.matrix = [];
+        this.effect = null;
+        this.targetWidth = this.parent.clientWidth; 
+        this.targetHeight = this.parent.clientHeight;
+        this.box.width = this.targetWidth;
+        this.box.height = this.targetHeight;
+        this.config = configObject
+        this.matrixHandler = new MatrixHandler(this)
+        
     }
 
-    return reducedMatrix;
-}
+    run(pathToJPG) {
+        if (pathToJPG !== undefined) {
+            this.loadImageToCanvas(pathToJPG);
+        } else if ("pathToJPG" in this.config) {
+            this.loadImageToCanvas(this.config.pathToJPG);
+        } else {
+            this.particalize(this.box)
+        }
+    }
 
-// function reduceMatrixByAvg(matrix, factor) {
-    // const numRows = matrix.length;
-    // const numCols = matrix[0].length;
-    // const reducedRows = Math.ceil(numRows / factor);
-    // const reducedCols = Math.ceil(numCols / factor);
-    // const reducedMatrix = [];
+    loadImageToCanvas(url) {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+            const canvasSource = document.createElement('canvas');
+            canvasSource.setAttribute('width', this.targetWidth);
+            canvasSource.setAttribute('height', this.targetHeight);
+            const ctx = canvasSource.getContext('2d');
+            ctx.drawImage(img, 0, 0, this.targetWidth, this.targetHeight) ; 
+            this.particalize(canvasSource);
+        };
+        img.src = url;
+    }
 
-    // for (let i = 0; i < reducedRows; i++) {
-    //     const row = [];
-    //     for (let j = 0; j < reducedCols; j++) {
-            // let sum = 0;
-            // let count = 0;
-            // for (let x = 0; x < factor; x++) {
-            //     for (let y = 0; y < factor; y++) {
-                    // const rowIndex = i * factor + x;
-                    // const colIndex = j * factor + y;
-                    // if (rowIndex < numRows && colIndex < numCols) {
-//                         sum += matrix[rowIndex][colIndex];
-//                         count++;
-//                     }
-//                 }
-//             }
-//             row.push(sum / count);
-//     //     }
-//     //     reducedMatrix.push(row);
-//     // }
+    particalize(canvas) {
+        this.matrix = this.matrixHandler.getGrayscaleMatrix(canvas);
+        this.box.width =  this.parent.clientWidth;   
+        this.box.height = this.parent.clientHeight;
+       
 
-//     // return reducedMatrix;
-// }
-
-function particalize(canvas) {
-        const grayscaleMatrix = getGrayscaleMatrix(canvas);
-
-        const canvasTarget = document.querySelector('#pCanvas');
-        canvasTarget.width = targetWidth    
-        canvasTarget.height = targetHeight 
-        const ctx = canvasTarget.getContext('2d');
-
-        let effect = new Effect(canvasTarget, canvasTarget.width, canvasTarget.height, ctx, grayscaleMatrix);
+        const effect = new Effect(this);
         function animate(){
             effect.update();
             requestAnimationFrame(animate)
@@ -325,34 +319,49 @@ function particalize(canvas) {
         animate()
     };
 
+    
+    
+}
 
-document.addEventListener('DOMContentLoaded', function() {
-    // loadImageToCanvas(config.imageUrl, particalize); // if there is an image
-    const canvasTarget = document.querySelector('#pCanvas');
-    canvasTarget.width = targetWidth    
-    canvasTarget.height = targetHeight 
+const config1 = {
+    colors : ['#353839', '#FF8C00', '#4B4E53'],
+    geometry: 'triangle', // triangle, square
+    // pointsDown: true, // comment to toggle for triangle
+    grayMethod: 'luminosity', // lightness, average
+    threshold: 255, // 0 (black) to 255 (white)
+    // pathToJPG: 'http://127.0.0.1:5500/schwarzbild.jpg',
+    poolingSize: 4,
+    poolingMethod: 'maximum',
+    factor: 20, //
+    particleSize: 7,
+    particleSizeFunction: particleSize.random , // comment to only use particleSize
+    keepParticleSize: false, // if false, the size of particles changes relative to zooming
+    keepParticlePopulation: false, // particles count remains the same when zooming
+    particleFriction: 0.8 // the smaller, the faster it returns to original place, if 1 it stays, > 1, it's gone
+}
 
-    const target = document.querySelector('#pCanvas');
-    particalize(target)
+const config2 = {
+    colors : ['#3CB839', '#FFFC00', '#4B4453'],
+    geometry: 'circle', // triangle, square
+    // pointsDown: true, // comment to toggle for triangle
+    grayMethod: "average" , // lightness, average, luminosity
+    threshold: 230, // 0 (black) to 255 (white)
+    pathToJPG: 'http://127.0.0.1:5500/console.jpg',
+    poolingSize: 10,
+    poolingMethod: 'maximum',
+    factor: 3, //
+    particleSize: 5,
+    // particleSizeFunction: particleSize.random , // comment to only use particleSize
+    keepParticleSize: true, // if false, the size of particles changes relative to zooming
+    keepParticlePopulation: false, // particles count remains the same when zooming
+    particleFriction: 0.8 // the smaller, the faster it returns to original place, if 1 it stays, > 1, it's gone
+}
+
+document.addEventListener('DOMContentLoaded', function() {   
+    const backgroundBox = new ParticleBox('#bg-canvas', config1);
+    backgroundBox.run();  // 
+
+    const imageBox = new ParticleBox('#img-canvas', config2);
+    imageBox.run();
 });
 
-
-// $("#btn-test").on('click', () => {
-//     console.log('klick')
-//     loadImageToCanvas('http://127.0.0.1:5500/console.jpg', particalize);
-// });
-
-
-
-
-// document.onkeydown = function(event) {
-//     if (event.ctrlKey && (event.key === '-' || event.key === '+')) {
-//         event.preventDefault();
-//     }
-// };
-
-// window.addEventListener('wheel', function(event) {
-//     if (event.ctrlKey) {
-//         event.preventDefault();
-//     }
-// }, { passive: false });
