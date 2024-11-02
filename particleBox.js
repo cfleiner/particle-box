@@ -324,7 +324,7 @@ class ParticleBox {
 }
 
 const config1 = {
-    colors : ['#353839', '#FF8C00', '#4B4E53'],
+    colors : ['#9DC097', '#82967F', '#9EEB91'],
     geometry: 'triangle', // triangle, square
     // pointsDown: true, // comment to toggle for triangle
     grayMethod: 'luminosity', // lightness, average
@@ -341,16 +341,16 @@ const config1 = {
 }
 
 const config2 = {
-    colors : ['#3CB839', '#FFFC00', '#4B4453'],
-    geometry: 'circle', // triangle, square
+    colors : ['#9EEB91', '#82967F'], //['#3CB839', '#FFFC00', '#4B4453'],
+    geometry: 'square', // triangle, square
     // pointsDown: true, // comment to toggle for triangle
     grayMethod: "average" , // lightness, average, luminosity
     threshold: 250, // 0 (black) to 255 (white)
     pathToJPG: 'http://127.0.0.1:5500/particle-box.jpg',
-    poolingSize: 10,
+    poolingSize: 20,
     poolingMethod: 'maximum',
-    factor: 3, //
-    particleSize: 5,
+    factor: 4, //
+    particleSize: 3,
     // particleSizeFunction: particleSize.gray , // comment to only use particleSize
     keepParticleSize: true, // if false, the size of particles changes relative to zooming
     keepParticlePopulation: false, // particles count remains the same when zooming

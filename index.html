@@ -11,84 +11,6 @@
 </head>
 <body>
 
-<style>
-    .full-window {
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: aqua;
-    }
-    .centered-container {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 500px;
-        height: 400px;
-        background-color: yellow;
-        transform: translate(-50%, -50%);
-
-    }
-
-    .top-left-button {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-    }
-
-    .top-right-button {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-    }
-
-.sidebar {
-        height: 100vh;
-        width: 250px;
-        position: fixed;
-        top: 0;
-        background-color: #343a40;
-        color: white;
-        transition: left 0.3s;
-    }
-
-.sidebar-left {
-    left: -250px;
-}
-.sidebar-left.show {
-    left: 0;
-}
-
-.sidebar-right {
-    right: -250px;
-}
-.sidebar-right.show {
-    right: 0;
-}
-
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-}
-
-body, html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-}
-
-canvas {
-    display: block;
-}
-
-
-</style>
 
 <div class="container-fluid full-window" style="width: 100%; height: 100%;">
     <canvas id="bg-canvas"></canvas>
@@ -101,55 +23,48 @@ canvas {
     </div>
 </div>
 
-<div class="sidebar sidebar-left show" id="left-sidebar">
+<div class="container overflow-auto sidebar sidebar-left show" id="left-sidebar">
     <button class="close-btn" onclick="toggleSidebar('left-sidebar')">&times;</button>
-    <h3>Sidebar</h3>
+    <h3>Configure Background</h3>
     <form>
-    <div class="vstack gap-2 px-3">
       
-       
-      
-       
-
         <div class="mb-3">
             <!-- // pathToJPG: 'http://127.0.0.1:5500/schwarzbild.jpg', -->
-            <label for="exampleFormControlInput1" class="form-label">Image (JPG) Url</label>
-            <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+            <label for="bg-image-url" class="form-label">Image (JPG) Url</label>
+            <input type="url" class="form-control bg-ctrl image-url" id="bg-image-url" placeholder="http://www.example.com/image.jpg">
         </div>
 
         <div>
             <!--  poolingSize: 4,  -->
-            <label for="range-pooling-size" class="form-label">Pooling Size: <span class="rangeValue"></span></label>
-            <input type="range" class="form-range"  min="0" max="100" step="1"  id="range-pooling-size">
+            <label for="bg-pooling-size" class="form-label">Pooling Size: <span class="rangeValue"></span></label>
+            <input type="range" class="form-range bg-ctrl pooling-size"  min="0" max="100" step="1" value="4"  id="bg-pooling-size">
         </div>
 
         
         <div>
-            <!--  poolingMethod: 'maximum', -->
-            <label for="exampleColorInput" class="form-label">Pooling Method</label>
-            <select class="form-select" aria-label="Default select example">
+            <label for="bg-pooling-method" class="form-label">Pooling Method</label>
+            <select id="bg-pooling-method" class="form-select bg-ctrl pooling-method" aria-label="Pooling Method">
                 <option value="maximum" selected>maximum</option>
                 <option value="average">average</option>
             </select>
         </div>
-       
-        <div class="mb-3">
-            <!-- particleSize: 7, -->
-            <label for="exampleFormControlInput1" class="form-label">Particle (base) size</label>
-            <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
-        </div>
-
-        <div class="mb-3">
-            <!-- factor: 20, // -->
-            <label for="exampleFormControlInput1" class="form-label">particle gap factor</label>
-            <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+        
+        <div>
+            <label for="bg-particle-size" class="form-label">Particle Size: <span class="rangeValue"></span></label>
+            <input type="range" class="form-range bg-ctrl particle-size"  min="1" max="30" step="1"  id="bg-particle-size">
         </div>
 
         <div>
-            <!-- particleSizeFunction: particleSize.random , // comment to only use particleSize -->
-            <label for="exampleColorInput" class="form-label">Particle size function</label>
-            <select class="form-select" aria-label="Default select example">
-                <option value="random" selected>random size</option>
+            <label for="bg-gap-factor" class="form-label">Gap Factor: <span class="rangeValue"></span></label>
+            <input type="range" class="form-range bg-ctrl gap-factor"  min="1" max="30" step="1"  id="bg-gap-factor">
+        </div>
+
+
+        <div>
+            <label for="bg-size-function" class="form-label">Particle size function</label>
+            <select id="bg-size-function" class="form-select bg-ctrl size-function" aria-label="Particle Size Function">
+                <option value="none">none</option>
+                <option value="random">random size</option>
                 <option value="gray">size relative to gray</option>
             </select>
         </div>
@@ -157,24 +72,25 @@ canvas {
       
 
         <div>
-            <!-- colors : ['#353839', '#FF8C00', '#4B4E53'], // Textfield -->
-            <label for="exampleColorInput" class="form-label">Background Color</label>
+            <label for="bg-color" class="form-label">Background Color</label>
             <div class="d-flex align-items-center">
-            <input type="color" class="form-control form-control-color" id="exampleColorInput" value="#563d7c" title="Choose your color">
+            <input type="color" class="form-control form-control-color bg-ctrl bg-color" id="bg-bg-color" value="#563d7c" title="Choose your color">
             <span class="colorValue mx-3">#563d7c</span>
             </div>
         </div>
         <div class="mb-3">
-            <label for="exampleFormControlTextarea1" class="form-label">Particle Colors</label>
-            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+            <label for="bg-colors" class="form-label">Particle Colors</label>
+            <textarea class="form-control my-textarea bg-ctrl colors" id="bg-colors" rows="3">
+                green,
+                yellow,
+                blue
+            </textarea>
         </div>
 
 
         <div>
-             <!-- geometry: 'triangle', // triangle, square // radiobutton
-            // pointsDown: true, // comment to toggle for triangle -->
-            <label for="exampleColorInput" class="form-label">Particle Shape</label>
-            <select class="form-select" aria-label="Default select example">
+            <label for="bg-shape" class="form-label">Particle Shape</label>
+            <select id="bg-shape" class="form-select bg-ctrl shape" aria-label="Particle Shape">
                 <option value="circle" selected>Circle</option>
                 <option value="square">Square</option>
                 <option value="triangle-up">Triangle (upwards pointing)</option>
@@ -185,38 +101,37 @@ canvas {
 
         <div>
             <!-- grayMethod: 'luminosity', // lightness, average -->
-            <label for="exampleColorInput" class="form-label">Graying Method</label>
-            <select class="form-select" aria-label="Default select example">
+            <label for="bg-gray-method" class="form-label">Graying Method</label>
+            <select id="bg-gray-method" class="form-select bg-ctrl gray-method" aria-label="Graying Method">
                 <option value="average">Average</option>
                 <option value="lightness">Lightness</option>
                 <option value="luminosity" selected>Luminosity</option>
             </select>
 
             <!-- threshold: 255, // 0 (black) to 255 (white) -->
-            <label for="range-gray-threshold" class="form-label">Gray threshold: <span class="rangeValue"></span></label>
-            <input type="range" class="form-range"  min="0" max="255" step="1"  id="range-gray-threshold">
+            <label for="bg-gray-threshold" class="form-label">Gray threshold: <span class="rangeValue"></span></label>
+            <input type="range" class="form-range bg-ctrl gray-threshold"  min="0" max="255" step="1"  id="bg-gray-threshold">
         </div>
 
         <div>
             <!-- particleFriction: 0.8 // the smaller, the faster it returns to original place, if 1 it stays, > 1, it's gone -->
-            <label for="range-particle-friction" class="form-label">Particle friction: <span class="rangeValue"></span></label>
-            <input type="range" class="form-range"  min="0" max="1" step="0.01"  id="range-particle-friction">
+            <label for="bg-particle-friction" class="form-label">Particle friction: <span class="rangeValue"></span></label>
+            <input type="range" class="form-range bg-ctrl particle-friction"  min="0" max="1" step="0.01"  id="bg-particle-friction">
         </div>
 
         <div class="form-check form-switch">
             <!-- keepParticleSize: false, // if false, the size of particles changes relative to zooming -->
-            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-            <label class="form-check-label" for="flexSwitchCheckChecked">Keep particle size</label>
+            <input class="form-check-input bg-ctrl zoom-keep-size" type="checkbox" role="switch" id="bg-zoom-keep-size" checked>
+            <label class="form-check-label" for="bg-zoom-keep-size">Keep particle size</label>
         </div>
 
         <div class="form-check form-switch">
             <!-- keepParticlePopulation: false, // particles count remains the same when zooming -->
-            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-            <label class="form-check-label" for="flexSwitchCheckChecked">Keep particle population</label>
+            <input class="form-check-input bg-ctrl zoom-keep-population" type="checkbox" role="switch" id="bg-zoom-keep-population" checked>
+            <label class="form-check-label" for="bg-zoom-keep-population">Keep particle population</label>
         </div>
 
-        <button type="button" class="btn btn-primary">Update</button>
-    </div>
+        <button id="btn-bg" type="button" class="btn btn-primary">Update</button>
     </form>
 </div>
 
@@ -226,11 +141,51 @@ canvas {
 
 <div class="sidebar sidebar-right" id="right-sidebar">
     <button class="close-btn" onclick="toggleSidebar('right-sidebar')">&times;</button>
-    <h3>Sidebar</h3>
+    <h3>Configure Center</h3>
     <p>Some content here...</p>
 </div>
+
+
 <script>
-  
+    
+
+$('#btn-bg').on('click', () => updateConfig('.bg-ctrl')); 
+$('#btn-center').on('click', () => updateConfig('.center-ctrl'))
+    
+    
+function updateConfig(cls) {
+    const config = {
+        keepParticleSize: $(cls + '.zoom-keep-size').is(':checked'), 
+        keepParticlePopulation: $(cls + '.zoom-keep-population').is(':checked'), 
+        poolingSize: $(cls + '.pooling-size').val() ,
+        threshold:   $(cls + '.gray-threshold').val(),
+        particleSize: $(cls + '.particle-size').val(),
+        particleFriction: $(cls + '.particle-friction').val(),
+        factor: $(cls + '.gap-factor').val(), 
+        grayMethod:  $(cls + '.gray-method').val(),
+        pathToJPG: $(cls + '.image-url').val(),
+        poolingMethod: $(cls + '.pooling-method').val(),
+        colors :  $(cls + '.colors').val().trim().replace(/,/g, ' ').split(/\s+/)
+    };
+
+    if ($(cls + '.size-function').val() !== 'none') {
+        config['particleSizeFunction'] = 'particleSize.' + $(cls + '.size-function').val()
+    } 
+    
+    const arr = $(cls + '.shape').val().split('-')
+    config['geometry'] = arr[0]
+
+    if (arr.length > 1) {
+        config['pointsDown'] =  (arr[1] === "down");
+    }
+
+
+   
+        
+
+    alert(JSON.stringify(config));
+    
+}
 
 
 
