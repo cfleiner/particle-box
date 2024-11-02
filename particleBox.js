@@ -345,13 +345,13 @@ const config2 = {
     geometry: 'circle', // triangle, square
     // pointsDown: true, // comment to toggle for triangle
     grayMethod: "average" , // lightness, average, luminosity
-    threshold: 230, // 0 (black) to 255 (white)
-    pathToJPG: 'http://127.0.0.1:5500/console.jpg',
+    threshold: 250, // 0 (black) to 255 (white)
+    pathToJPG: 'http://127.0.0.1:5500/particle-box.jpg',
     poolingSize: 10,
     poolingMethod: 'maximum',
     factor: 3, //
     particleSize: 5,
-    // particleSizeFunction: particleSize.random , // comment to only use particleSize
+    // particleSizeFunction: particleSize.gray , // comment to only use particleSize
     keepParticleSize: true, // if false, the size of particles changes relative to zooming
     keepParticlePopulation: false, // particles count remains the same when zooming
     particleFriction: 0.8 // the smaller, the faster it returns to original place, if 1 it stays, > 1, it's gone
