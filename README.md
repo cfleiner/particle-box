@@ -13,7 +13,7 @@ If _ParticleBox_ does not fit your requirements, check out
 3. Create a configuration.
 4. Create a ParticleBox and run it.
    
-
+__HTML snippet__
 ```html
  <div>
     <canvas id="my-canvas"></canvas>
@@ -21,7 +21,7 @@ If _ParticleBox_ does not fit your requirements, check out
 
  <script src="./particleBox.js"></script>
 ```
-
+__JavaScript snippet__
 ```js
 const config = {
   "keepParticleSize": false,
@@ -66,7 +66,7 @@ key | option type / notes | example
 #### `Behavior`
 key | option type / notes | example
 ----|---------|------
-`particleFriction: 0.8 // the smaller, the faster it returns to original place, if 1 it stays, > 1, it's gone`
+`particleFriction` | number | `0.8` 
 
 #### `Image`
 key | option type / notes | example

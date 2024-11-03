@@ -223,6 +223,7 @@ class Effect {
                         
             this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
+            // add to handle image retrieval
             const newMatrix = this.box.matrixHandler.getGrayscaleMatrix(this.canvas);
             this.matrix = this.box.matrixHandler.reduceMatrix(newMatrix)
 
@@ -232,6 +233,7 @@ class Effect {
         })
         this.init();
     }
+
 
     init(){
         for(let y = 0; y < this.matrix.length; y++){
@@ -266,7 +268,6 @@ class ParticleBox {
         this.box.height = this.targetHeight;
         this.config = configObject;
         this.matrixHandler = new MatrixHandler(this);
-
         this.parent.style.backgroundColor = this.config.bgColor;
         
     }
@@ -313,45 +314,6 @@ class ParticleBox {
     
 }
 
-const config1 = {
-    colors : ['#9DC097', '#82967F', '#9EEB91'],
-    geometry: 'triangle', // triangle, square
-    // pointsDown: true, // comment to toggle for triangle
-    grayMethod: 'luminosity', // lightness, average
-    threshold: 255, // 0 (black) to 255 (white)
-    // pathToJPG: 'http://127.0.0.1:5500/schwarzbild.jpg',
-    poolingSize: 4,
-    poolingMethod: 'maximum',
-    factor: 20, //
-    particleSize: 7,
-    particleSizeFunction: particleSize.random , // comment to only use particleSize
-    keepParticleSize: false, // if false, the size of particles changes relative to zooming
-    keepParticlePopulation: false, // particles count remains the same when zooming
-    particleFriction: 0.8 // the smaller, the faster it returns to original place, if 1 it stays, > 1, it's gone
-}
 
-const config2 = {
-    colors : ['#9EEB91', '#82967F'], //['#3CB839', '#FFFC00', '#4B4453'],
-    geometry: 'square', // triangle, square
-    // pointsDown: true, // comment to toggle for triangle
-    grayMethod: "average" , // lightness, average, luminosity
-    threshold: 250, // 0 (black) to 255 (white)
-    pathToJPG: 'http://127.0.0.1:5500/particle-box.jpg',
-    poolingSize: 20,
-    poolingMethod: 'maximum',
-    factor: 4, //
-    particleSize: 3,
-    // particleSizeFunction: particleSize.gray , // comment to only use particleSize
-    keepParticleSize: true, // if false, the size of particles changes relative to zooming
-    keepParticlePopulation: false, // particles count remains the same when zooming
-    particleFriction: 0.8 // the smaller, the faster it returns to original place, if 1 it stays, > 1, it's gone
-}
 
-document.addEventListener('DOMContentLoaded', function() {   
-    const backgroundBox = new ParticleBox('#bg-canvas', config1);
-    backgroundBox.run();  // 
-
-    const centerBox = new ParticleBox('#img-canvas', config2);
-    centerBox.run();
-});
 
