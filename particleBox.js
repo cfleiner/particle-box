@@ -1,13 +1,3 @@
-let particleSize = {
-    random: function(baseSize, gray) {
-        return Math.max(Math.floor(Math.random() * baseSize));
-    },
-    gray: function(baseSize, gray) {
-        return Math.floor(baseSize - (gray / 255*baseSize))    
-    }
-}
-
-
 
 class MatrixHandler {
     constructor(particleBox) {
@@ -264,8 +254,6 @@ class Effect {
 }
 
 
-
-
 class ParticleBox {
     constructor(canvasSelector, configObject){
         this.box = document.querySelector(canvasSelector);
@@ -276,8 +264,10 @@ class ParticleBox {
         this.targetHeight = this.parent.clientHeight;
         this.box.width = this.targetWidth;
         this.box.height = this.targetHeight;
-        this.config = configObject
-        this.matrixHandler = new MatrixHandler(this)
+        this.config = configObject;
+        this.matrixHandler = new MatrixHandler(this);
+
+        this.parent.style.backgroundColor = this.config.bgColor;
         
     }
 
@@ -361,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const backgroundBox = new ParticleBox('#bg-canvas', config1);
     backgroundBox.run();  // 
 
-    const imageBox = new ParticleBox('#img-canvas', config2);
-    imageBox.run();
+    const centerBox = new ParticleBox('#img-canvas', config2);
+    centerBox.run();
 });
 

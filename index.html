@@ -31,18 +31,18 @@
 
 <div class="container">
     <div class="hstack gap-3 lower-menu justify-content-center align-items-center">
-        <button class="btn btn-secondary" onclick="toggleSidebar('left-sidebar')"><i class="fa-solid fa-gears"></i> Edit window</button>
-        <a class="btn btn-secondary" href="https://github.com/cfleiner/particle-box"> <i class="fab fa-github"></i> GitHub</a>
+        <button class="btn btn-secondary" onclick="toggleSidebar('left-sidebar')"><i class="fa-solid fa-gears"></i> Edit Background</button>
+        <a class="btn btn-secondary" href="https://github.com/cfleiner/particle-box" target="_blank"> <i class="fab fa-github"></i> GitHub</a>
         <button class="btn btn-secondary" onclick="toggleSidebar('right-sidebar')"><i class="fa-solid fa-gears"></i> Edit center</button>
     </div>
   </div>
 
 
-<div class="container overflow-auto sidebar sidebar-left show" id="left-sidebar">
+<div class="container overflow-auto sidebar sidebar-left" id="left-sidebar">
     <button class="close-btn" onclick="toggleSidebar('left-sidebar')">&times;</button>
     <h3 class="py-3">Configure Background</h3>
 
-        <div class="accordion" id="bg-accordion">
+        <div class="accordion" id="bg-accordion"> <!-- start appearance -->
             <div class="accordion-item">
               <h2 class="accordion-header">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#bg-acc-appearance" aria-expanded="false" aria-controls="bg-acc-appearance">
@@ -84,9 +84,9 @@
 
                 </div>
               </div>
-            </div>
+            </div> <!-- end appearance -->
 
-            <div class="accordion-item">
+            <div class="accordion-item"> <!-- start colors -->
                 <h2 class="accordion-header">
                   <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#bg-acc-colors" aria-expanded="false" aria-controls="bg-acc-colors">
                     Colors
@@ -96,7 +96,7 @@
                   <div class="accordion-body">
                     
                     <div>
-                        <label for="bg-color" class="form-label">Background Color</label>
+                        <label for="bg-bg-color" class="form-label">Background Color</label>
                         <div class="d-flex align-items-center">
                         <input type="color" class="form-control form-control-color bg-ctrl bg-color" id="bg-bg-color" value="#264121" title="Choose your color">
                         <span class="colorValue mx-3">#264121</span>
@@ -110,9 +110,9 @@
 
                   </div>
                 </div>
-              </div>
+              </div> <!-- end colors -->
 
-            <div class="accordion-item"> 
+            <div class="accordion-item"> <!-- start behavior -->
                 <h2 class="accordion-header">
                   <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#bg-acc-behavior" aria-expanded="true" aria-controls="bg-acc-behavior">
                     Behavior
@@ -128,7 +128,7 @@
 
                   </div>
                 </div>
-            </div>
+            </div> <!-- end behavior -->
 
             <div class="accordion-item"> <!-- start image -->
                 <h2 class="accordion-header">
@@ -179,7 +179,7 @@
                   </button>
                 </h2>
 
-                <div id="bg-acc-zoom" class="accordion-collapse collapse show" data-bs-parent="#bg-accordion"> 
+                <div id="bg-acc-zoom" class="accordion-collapse collapse" data-bs-parent="#bg-accordion"> 
                   <div class="accordion-body">
                     <div class="form-check form-switch">
                         <input class="form-check-input bg-ctrl zoom-keep-size" type="checkbox" role="switch" id="bg-zoom-keep-size">
@@ -195,33 +195,222 @@
             </div> <!-- end accordion -->
         
            
-        </div> <!-- end of accordion -->
+        </div> <!-- end of sidebar -->
       
-        <div class="container py-3">
-            <button id="btn-bg" type="button" class="btn btn-secondary" style="width: 200px">Update</button>
+        <div class="hstack align-items-center justify-content-around py-3">
+            <button id="btn-bg" type="button" class="btn btn-secondary">Update</button>
+            <button id="btn-bg-download" type="button" class="btn btn-secondary">Download</button>
         </div>
        
 </div>
 
-
-
-
-
-<div class="sidebar sidebar-right" id="right-sidebar">
+<div class="container overflow-auto sidebar sidebar-right" id="right-sidebar">
     <button class="close-btn" onclick="toggleSidebar('right-sidebar')">&times;</button>
-    <h3>Configure Center</h3>
-    <p>Some content here...</p>
-</div>
+    <h3 class="py-3">Configure Center</h3>
+
+        <div class="accordion" id="center-accordion"> <!-- start appearance -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#center-acc-appearance" aria-expanded="false" aria-controls="center-acc-appearance">
+                    Appearance
+                </button>
+                </h2>
+                <div id="center-acc-appearance" class="accordion-collapse collapse" data-bs-parent="#center-accordion">
+                <div class="accordion-body">
+                    
+                    <div>
+                        <label for="center-shape" class="form-label">Particle Shape</label>
+                        <select id="center-shape" class="form-select center-ctrl shape" aria-label="Particle Shape">
+                            <option value="circle">Circle</option>
+                            <option value="square" selected>Square</option>
+                            <option value="triangle-up">Triangle (upwards pointing)</option>
+                            <option value="triangle-down">Triangle (downwards pointing)</option>
+                            <option value="triangle">Triangle (toggling)</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="center-particle-size" class="form-label">Particle Size: <span class="rangeValue"></span></label>
+                        <input type="range" class="form-range center-ctrl particle-size"  min="1" max="30" step="1" value="3"  id="center-particle-size">
+                    </div>
+
+                    <div>
+                        <label for="center-size-function" class="form-label">Particle size function</label>
+                        <select id="center-size-function" class="form-select center-ctrl size-function" aria-label="Particle Size Function">
+                            <option value="none" selected>none</option>
+                            <option value="random">random size</option>
+                            <option value="gray">size relative to gray</option>
+                        </select>
+                    </div>
+            
+                    <div>
+                        <label for="centergap-factor" class="form-label">Gap Factor: <span class="rangeValue"></span></label>
+                        <input type="range" class="form-range center-ctrl gap-factor"  min="1" max="30" step="1" value="4"  id="centergap-factor">
+                    </div>
+
+                </div>
+                </div>
+            </div> <!-- end appearance -->
+
+           
+            <div class="accordion-item"> <!-- start colors -->
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#center-acc-colors" aria-expanded="false" aria-controls="center-acc-colors">
+                    Colors
+                    </button>
+                </h2>
+                <div id="center-acc-colors" class="accordion-collapse collapse" data-bs-parent="#center-accordion">
+                    <div class="accordion-body">
+                    
+                    <div>
+                        <label for="center-bg-color" class="form-label">Background Color</label>
+                        <div class="d-flex align-items-center">
+                        <input type="color" class="form-control form-control-color center-ctrl bg-color" id="center-bg-color" value="#4E6B49" title="Choose your color">
+                        <span class="color-Value mx-3">#4E6B49</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="center-colors" class="form-label">Particle Colors</label>
+                        <textarea class="form-control my-textarea center-ctrl colors" id="center-colors" rows="3">#9EEB91, #82967F
+                        </textarea>
+                    </div>
+
+                    </div>
+                </div>
+                </div> <!-- end colors -->
+
+    
+            <div class="accordion-item"> <!-- start behavior -->
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#center-acc-behavior" aria-expanded="true" aria-controls="center-acc-behavior">
+                    Behavior
+                    </button>
+                </h2>
+                <div id="center-acc-behavior" class="accordion-collapse collapse" data-bs-parent="#center-accordion">
+                    <div class="accordion-body">
+
+                    <div>
+                        <label for="centerparticle-friction" class="form-label">Particle friction: <span class="rangeValue"></span></label>
+                        <input type="range" class="form-range center-ctrl particle-friction"  min="0" max="1" step="0.01" value="0.80"  id="centerparticle-friction">
+                    </div>
+
+                    </div>
+                </div>
+            </div> <!-- end behavior -->
+
+
+
+            <div class="accordion-item"> <!-- start image -->
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#center-acc-image" aria-expanded="false" aria-controls="center-acc-image">
+                    Image
+                    </button>
+                </h2>
+                <div id="center-acc-image" class="accordion-collapse collapse" data-bs-parent="#center-accordion">
+                    <div class="accordion-body">
+                    
+                    <div class="mb-3">
+                        <label for="center-image-url" class="form-label">Image (JPG) Url</label>
+                        <input type="url" class="form-control center-ctrl image-url" id="center-image-url" placeholder="http://www.example.com/image.jpg" value="http://127.0.0.1:5500/particle-box.jpg">
+                    </div>
+
+                    <div>
+                        <label for="center-pooling-method" class="form-label">Pooling Method</label>
+                        <select id="center-pooling-method" class="form-select center-ctrl pooling-method" aria-label="Pooling Method">
+                            <option value="maximum" selected>maximum</option>
+                            <option value="average">average</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="center-pooling-size" class="form-label">Pooling Size: <span class="rangeValue"></span></label>
+                        <input type="range" class="form-range center-ctrl pooling-size"  min="0" max="100" step="1" value="20"  id="center-pooling-size">
+                    </div>
+
+                    <div>
+                        <label for="centergray-method" class="form-label">Graying Method</label>
+                        <select id="centergray-method" class="form-select center-ctrl gray-method" aria-label="Graying Method">
+                            <option value="average" selected>Average</option>
+                            <option value="lightness">Lightness</option>
+                            <option value="luminosity">Luminosity</option>
+                        </select>
+            
+                        <label for="center-gray-threshold" class="form-label">Gray threshold: <span class="rangeValue"></span></label>
+                        <input type="range" class="form-range center-ctrl gray-threshold"  min="0" max="255" step="1" value="250"  id="center-gray-threshold">
+                    </div>
+                    </div>
+                </div>
+            </div> <!-- end image -->
+
+        
+            <div class="accordion-item"> <!-- start zoom -->
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#center-acc-zoom" aria-expanded="false" aria-controls="center-acc-zoom">
+                    Zoom
+                    </button>
+                </h2>
+
+                <div id="center-acc-zoom" class="accordion-collapse collapse" data-bs-parent="#center-accordion"> 
+                    <div class="accordion-body">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input center-ctrl zoom-keep-size" type="checkbox" role="switch" id="center-zoom-keep-size" checked>
+                        <label class="form-check-label" for="center-zoom-keep-size">Keep particle size</label>
+                    </div>
+            
+                    <div class="form-check form-switch">
+                        <input class="form-check-input center-ctrl zoom-keep-population" type="checkbox" role="switch" id="center-zoom-keep-population">
+                        <label class="form-check-label" for="center-zoom-keep-population">Keep particle population</label>
+                    </div>
+                    </div>
+                </div> <!-- end zoom -->
+            </div> <!-- end accordion -->
+            
+            <div class="hstack align-items-center justify-content-around py-3">
+                <button id="btn-center" type="button" class="btn btn-secondary">Update</button>
+                <button id="btn-center-download" type="button" class="btn btn-secondary">Download</button>
+
+            </div>
+            
+        </div> <!-- end of sidebar -->
 
 
 <script>
+
+let particleSize = {
+    random: function(baseSize, gray) {
+        return Math.max(Math.floor(Math.random() * baseSize));
+    },
+    gray: function(baseSize, gray) {
+        return Math.floor(baseSize - (gray / 255*baseSize))    
+    }
+}
+
     
 
-$('#btn-bg').on('click', () => updateConfig('.bg-ctrl')); 
-$('#btn-center').on('click', () => updateConfig('.center-ctrl'))
+$('#btn-bg').on('click', function (){ 
+    const config = getConfig('.bg-ctrl');
+    // alert(JSON.stringify(config))
+    const backgroundBox = new ParticleBox('#bg-canvas', config);
+    backgroundBox.run();
+}); 
+
+$('#btn-center').on('click', function () {
+    const config = getConfig('.center-ctrl');
+    //  alert(JSON.stringify(config))
+    const centerBox = new ParticleBox('#img-canvas', config);
+    centerBox.run();
+});
+
+$('#btn-bg-download').on('click', function() {
+    downloadJSON( getConfig('.bg-ctrl'), "particle-box-config.json");
+});
+
+$('#btn-center-download').on('click', function() {
+    downloadJSON( getConfig('.center-ctrl'), "particle-box-config.json");
+});
     
     
-function updateConfig(cls) {
+function getConfig(cls) {
     const config = {
         keepParticleSize: $(cls + '.zoom-keep-size').is(':checked'), 
         keepParticlePopulation: $(cls + '.zoom-keep-population').is(':checked'), 
@@ -231,16 +420,19 @@ function updateConfig(cls) {
         particleFriction: $(cls + '.particle-friction').val(),
         factor: $(cls + '.gap-factor').val(), 
         grayMethod:  $(cls + '.gray-method').val(),
-        pathToJPG: $(cls + '.image-url').val(),
         poolingMethod: $(cls + '.pooling-method').val(),
         colors :  $(cls + '.colors').val().trim().replace(/,/g, ' ').split(/\s+/),
         bgColor: $(cls + '.bg-color').val(),
     };
 
+    if ($(cls + '.image-url').val().length > 0) {
+        config['pathToJPG'] = $(cls + '.image-url').val()
+    }
+ 
     if ($(cls + '.size-function').val() !== 'none') {
-        config['particleSizeFunction'] = 'particleSize.' + $(cls + '.size-function').val()
+        config['particleSizeFunction'] = particleSize[$(cls + '.size-function').val()];
     } 
-    
+   
     const arr = $(cls + '.shape').val().split('-')
     config['geometry'] = arr[0]
 
@@ -248,16 +440,27 @@ function updateConfig(cls) {
         config['pointsDown'] =  (arr[1] === "down");
     }
 
-
-
-
-    alert(JSON.stringify(config));
-    
+    return config;
 }
 
 
+function downloadJSON(obj, filename) {
+    const jsonStr = JSON.stringify(obj, null, 2); // Convert object to JSON string
+    const blob = new Blob([jsonStr], { type: "application/json" }); // Create a Blob from the JSON string
+    const url = URL.createObjectURL(blob); // Create a URL for the Blob
 
-    function toggleSidebar(id) {
+    const a = $('<a>').attr({
+        href: url,
+        download: filename
+    }).appendTo('body'); // Create and append an anchor element using jQuery
+    
+    a[0].click(); // Programmatically click the anchor to trigger the download
+    a.remove(); // Remove the anchor from the body
+    URL.revokeObjectURL(url); // Revoke the object URL
+}
+
+
+function toggleSidebar(id) {
         const sidebar = document.getElementById(id);
         sidebar.classList.toggle('show');
     }
