@@ -223,11 +223,6 @@ class Effect {
                         
             this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
-            // add to handle image retrieval
-            const newMatrix = this.box.matrixHandler.getGrayscaleMatrix(this.canvas);
-            this.matrix = this.box.matrixHandler.reduceMatrix(newMatrix)
-
-
             this.particlesArray = [];
             this.init();
         })
